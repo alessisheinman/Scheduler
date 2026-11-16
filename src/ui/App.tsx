@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BackupBar } from './BackupBar';
 import { DogLightbox, DogRails, DogStrip, type DogPhoto } from './DogRails';
+import { ImportWizard } from './ImportWizard';
 import { PaydayScreen } from './PaydayScreen';
 import { PeopleScreen } from './PeopleScreen';
 import { useAppData } from './useAppData';
@@ -60,9 +61,7 @@ export function App() {
               onPayday={() => go('payday')} onImport={() => go('import')} onSaveImage={() => void downloadScheduleImage(buildImageModel(app.data, monday), `schedule-${monday}.png`)} />
           )}
           {view === 'payday' && <PaydayScreen app={app} />}
-          {view === 'import' && (
-            <div className="card"><p className="empty">Coming next.</p></div>
-          )}
+          {view === 'import' && <ImportWizard app={app} onDone={() => { setMonday(null); go('week'); }} />}
         </main>
       )}
     </div>

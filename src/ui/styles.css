@@ -298,3 +298,20 @@ td.open .cell { outline: 3px solid var(--ink); }
 .payday-table td.ot { color: var(--red); font-weight: 700; }
 .payday-table tbody tr:hover { background: var(--surface-2); }
 .payday-actions { margin-left: auto; }
+
+/* ---------- import wizard ---------- */
+.page-wide { max-width: 1100px; margin: 0 auto; }
+.wizard-steps { display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; padding: 0; margin: 0 0 1rem; counter-reset: step; }
+.wizard-steps li { counter-increment: step; padding: 0.3rem 0.7rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); font-size: 0.88rem; }
+.wizard-steps li::before { content: counter(step) '. '; }
+.wizard-steps li.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 700; }
+.wizard-steps li.done { color: var(--ink); }
+.wizard h3 { margin: 1.25rem 0 0.4rem; font-size: 1rem; }
+.wizard-nav { margin-top: 1.25rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.wizard details { margin-top: 1rem; }
+.wizard summary { cursor: pointer; font-weight: 650; color: var(--brand); }
+.wizard li.resolved { opacity: 0.6; }
+.wizard code { background: var(--surface-2); padding: 0.05rem 0.3rem; border-radius: 4px; }
+.two-col { columns: 2 22rem; column-gap: 2rem; }
+.two-col li { break-inside: avoid; }
+.wizard .swatch { display: inline-block; flex: none; }

@@ -16,7 +16,7 @@ test('normalizeName', () => {
 test('finds every kind of problem once', () => {
   expect(kinds()).toEqual(['colored-empty', 'duplicate-week', 'no-name-row', 'two-boxes-one-day', 'unreadable']);
   const unreadable = draft.issues.find((i) => i.kind === 'unreadable')!;
-  expect(unreadable).toMatchObject({ tab: 'NOVEMBER 2026 WEEK 1', name: 'ANA', day: 1, text: '9PAM-9PM' });
+  expect(unreadable).toMatchObject({ tab: 'NOVEMBER 2026 WEEK 1', name: 'ANA', day: 1, text: '9PAM-9PM', venue: 'BARCLAYS' });
   expect(draft.issues.find((i) => i.kind === 'colored-empty')).toMatchObject({ name: 'BEN', day: 3 });
   expect(draft.issues.find((i) => i.kind === 'two-boxes-one-day')).toMatchObject({ name: 'ANA', day: 1 });
 });

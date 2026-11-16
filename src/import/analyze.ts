@@ -5,7 +5,7 @@ import type { RawCell, RawWorkbook } from './readWorkbook';
 import { colorKeyToHex } from './theme';
 
 export type IssueKind = 'unreadable' | 'colored-empty' | 'no-name-row' | 'duplicate-week' | 'two-boxes-one-day';
-export interface Issue { id: string; kind: IssueKind; tab: string; name?: string; day?: number; text?: string }
+export interface Issue { id: string; kind: IssueKind; tab: string; name?: string; day?: number; text?: string; venue?: string }
 export interface ColorQuestion {
   key: string; // `${tab}|${color}`
   tab: string;
@@ -64,7 +64,8 @@ export function analyze(raw: RawWorkbook): ImportDraft {
           perDay.set(key, seen);
         }
         if (c.text !== null && !parseShift(c.text)) {
-          issues.push({ id: issueId('unreadable', tab.tab, row.rowNumber, day), kind: 'unreadable', tab: tab.tab, name, day, text: c.text });
+          const venue = tab.legend.find((l) => l.color === c.color)?.venue;
+          issues.push({ id: issueId('unreadable', tab.tab, row.rowNumber, day), kind: 'unreadable', tab: tab.tab, name, day, text: c.text, venue });
         }
         if (!hasEntry(c) && c.color) {
           issues.push({ id: issueId('colored-empty', tab.tab, row.rowNumber, day), kind: 'colored-empty', tab: tab.tab, name, day });
