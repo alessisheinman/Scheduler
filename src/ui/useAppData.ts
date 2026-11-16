@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { emptyData, type AppData } from '../model/types';
-import { parseBackup, reconnectBackup, serializeBackup, writeBackup, type BackupStatus } from '../storage/backup';
+import { decideConnect, parseBackup, reconnectBackup, serializeBackup, writeBackup, type BackupStatus } from '../storage/backup';
 import { loadBackupHandle, loadData, requestPersistence, saveBackupHandle, saveData } from '../storage/db';
 
 export interface AppState {
@@ -15,6 +15,8 @@ export interface AppState {
   connectBackup(): Promise<void>;
   reconnect(): Promise<void>;
   restore(file: File): Promise<AppData>;
+  /** Set when turning on backup found an existing backup and loaded it. */
+  restoredFromBackup: boolean;
   downloadBackup(): void;
 }
 
@@ -26,6 +28,7 @@ export function useAppData(): AppState {
   const [saveFailed, setSaveFailed] = useState(false);
   const [backup, setBackup] = useState<BackupStatus>('none');
   const [backupAt, setBackupAt] = useState<Date | null>(null);
+  const [restoredFromBackup, setRestoredFromBackup] = useState(false);
   const handle = useRef<FileSystemFileHandle | null>(null);
   const timer = useRef<number | undefined>(undefined);
   const latest = useRef<AppData>(data);
@@ -67,11 +70,19 @@ export function useAppData(): AppState {
       });
       handle.current = h;
       await saveBackupHandle(h);
-      await runBackup();
+      // Never write an empty site over a real backup (e.g. after the browser was wiped): load it instead.
+      let existing: string | null = null;
+      try { existing = await (await h.getFile()).text(); } catch { /* new file */ }
+      if (decideConnect(latest.current, existing) === 'restore') {
+        commit(parseBackup(existing!));
+        setRestoredFromBackup(true);
+      } else {
+        await runBackup();
+      }
     } catch {
       /* she closed the picker */
     }
-  }, [runBackup]);
+  }, [runBackup, commit]);
 
   const reconnect = useCallback(async () => {
     if (handle.current && (await reconnectBackup(handle.current))) await runBackup();
@@ -89,7 +100,7 @@ export function useAppData(): AppState {
   }, []);
 
   return {
-    loaded, data, update, replaceAll: commit, saveFailed, backup, backupAt,
+    loaded, data, update, replaceAll: commit, saveFailed, backup, backupAt, restoredFromBackup,
     canAutoBackup: typeof window !== 'undefined' && !!window.showSaveFilePicker,
     connectBackup, reconnect, restore, downloadBackup,
   };

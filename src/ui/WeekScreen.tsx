@@ -1,19 +1,14 @@
 import { useState } from 'react';
 import { peopleForWeek, startNextWeek } from '../model/ops';
-import { addDays, mondayOf, weekLabel, type ISODate } from '../model/week';
+import { addDays, mondayOf, todayISO, weekLabel, type ISODate } from '../model/week';
 import { AddCrewPanel } from './AddCrewPanel';
 import { HoursPanel } from './HoursPanel';
 import type { AppState } from './useAppData';
 import { WeekGrid } from './WeekGrid';
 
-const today = (): ISODate => {
-  const t = new Date();
-  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
-};
-
 export function defaultMonday(app: AppState): ISODate {
   const weeks = app.data.weeks;
-  return weeks.length ? weeks[weeks.length - 1].monday : mondayOf(today());
+  return weeks.length ? weeks[weeks.length - 1].monday : mondayOf(todayISO());
 }
 
 export function WeekScreen({ app, monday, setMonday, onPayday, onSaveImage, onImport }: {

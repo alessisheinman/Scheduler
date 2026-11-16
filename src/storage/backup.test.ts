@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { addPerson, addVenue, setBox } from '../model/ops';
 import { emptyData } from '../model/types';
-import { parseBackup, serializeBackup, writeBackup, type FileLike } from './backup';
+import { decideConnect, parseBackup, serializeBackup, writeBackup, type FileLike } from './backup';
 
 function sample() {
   let d = addVenue(addPerson(emptyData(), 'ANA'), 'BARCLAYS');
@@ -58,5 +58,21 @@ describe('writeBackup', () => {
   test('a failed write reports an error instead of throwing', async () => {
     const { file } = fakeFile('granted', true);
     expect(await writeBackup(file, sample(), 'now')).toBe('error');
+  });
+});
+
+describe('connecting a backup file to an empty site', () => {
+  test('an existing backup with data is restored instead of overwritten', () => {
+    const saved = serializeBackup(sample(), 'then');
+    expect(decideConnect(emptyData(), saved)).toBe('restore');
+  });
+  test('a site with data writes over the chosen file as usual', () => {
+    expect(decideConnect(sample(), serializeBackup(sample(), 'then'))).toBe('write');
+  });
+  test('an empty or unrelated file is written', () => {
+    expect(decideConnect(emptyData(), '')).toBe('write');
+    expect(decideConnect(emptyData(), null)).toBe('write');
+    expect(decideConnect(emptyData(), '{"app":"other"}')).toBe('write');
+    expect(decideConnect(emptyData(), serializeBackup(emptyData(), 'then'))).toBe('write');
   });
 });

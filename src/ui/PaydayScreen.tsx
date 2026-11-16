@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { periodTotals } from '../model/payroll';
+import { defaultPaydayWeek, periodTotals } from '../model/payroll';
 import { formatHours } from '../model/time';
-import { addDays, weekLabel, type ISODate } from '../model/week';
+import { addDays, todayISO, weekLabel, type ISODate } from '../model/week';
 import { downloadPayday } from './exportPayday';
 import type { AppState } from './useAppData';
 
@@ -19,7 +19,7 @@ export function PaydayScreen({ app }: { app: AppState }) {
   const mondays = data.weeks.map((w) => w.monday).reverse();
   const [pick, setPick] = useState<ISODate | null>(null);
   const [twoWeeks, setTwoWeeks] = useState(false);
-  const last = pick ?? mondays[0];
+  const last = pick ?? defaultPaydayWeek(mondays, todayISO());
 
   if (!last) return <div className="card page-narrow"><h2>Payday</h2><p className="empty">No weeks yet.</p></div>;
 
@@ -56,15 +56,14 @@ export function PaydayScreen({ app }: { app: AppState }) {
             <tbody>
               {rows.map((t) => {
                 const p = person(t.personId);
-                return p.dayRate ? (
-                  <tr key={t.personId}><td>{p.name}</td><td>—</td><td>—</td><td>—</td><td><b>{t.days}</b></td></tr>
-                ) : (
+                const showHours = t.hours > 0 || t.days === 0;
+                return (
                   <tr key={t.personId}>
                     <td>{p.name}</td>
-                    <td><b>{formatHours(t.hours)}</b></td>
-                    <td>{formatHours(t.regular)}</td>
-                    <td className={t.overtime > 0 ? 'ot' : ''}>{formatHours(t.overtime)}</td>
-                    <td>—</td>
+                    <td>{showHours ? <b>{formatHours(t.hours)}</b> : '—'}</td>
+                    <td>{showHours ? formatHours(t.regular) : '—'}</td>
+                    <td className={t.overtime > 0 ? 'ot' : ''}>{showHours ? formatHours(t.overtime) : '—'}</td>
+                    <td>{t.days > 0 ? <b>{t.days}</b> : '—'}</td>
                   </tr>
                 );
               })}

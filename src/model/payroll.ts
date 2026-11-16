@@ -5,6 +5,7 @@ import type { ISODate } from './week';
 
 export const OVERTIME_AFTER = 40;
 
+/** `hours` come from shift boxes and `days` from day-rate boxes, so a later change to someone's pay type never rewrites past totals. */
 export interface PersonTotal { personId: ID; hours: number; regular: number; overtime: number; days: number }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -17,12 +18,14 @@ export function weekTotals(data: AppData, monday: ISODate): Map<ID, PersonTotal>
   for (const [personId, row] of Object.entries(w.boxes)) {
     let hours = 0;
     let days = 0;
+    let boxes = 0;
     for (const b of row) {
       if (!b) continue;
-      days++;
+      boxes++;
       if (b.kind === 'shift') hours += shiftHours(b.start, b.end);
+      else days++;
     }
-    if (days === 0) continue;
+    if (boxes === 0) continue;
     hours = round2(hours);
     out.set(personId, {
       personId, hours, days,
@@ -31,6 +34,13 @@ export function weekTotals(data: AppData, monday: ISODate): Map<ID, PersonTotal>
     });
   }
   return out;
+}
+
+/** The week payday opens on: the newest week that has already started (not next week's plan). */
+export function defaultPaydayWeek(mondays: ISODate[], today: ISODate): ISODate | undefined {
+  const sorted = [...mondays].sort();
+  const started = sorted.filter((m) => m <= today);
+  return started[started.length - 1] ?? sorted[sorted.length - 1];
 }
 
 /** Totals over one or more weeks; overtime is worked out week by week, then added up. */

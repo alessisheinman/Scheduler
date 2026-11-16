@@ -13,7 +13,8 @@ export async function downloadPayday(rows: PersonTotal[], people: Person[], titl
   for (const t of rows) {
     const p = people.find((x) => x.id === t.personId);
     if (!p) continue;
-    ws.addRow(p.dayRate ? [p.name, null, null, null, t.days] : [p.name, t.hours, t.regular, t.overtime, null]);
+    const showHours = t.hours > 0 || t.days === 0;
+    ws.addRow([p.name, showHours ? t.hours : null, showHours ? t.regular : null, showHours ? t.overtime : null, t.days > 0 ? t.days : null]);
   }
   ws.getColumn(1).width = 22;
   for (const c of [2, 3, 4, 5]) ws.getColumn(c).width = 14;

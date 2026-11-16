@@ -40,6 +40,13 @@ export function BackupBar({ app }: { app: AppState }) {
           <button type="button" className="primary" onClick={() => void app.reconnect()}>Reconnect backup</button>
         </span>
       )}
+      {app.restoredFromBackup && <span className="backup-state ok">Loaded everything from your backup file ✓</span>}
+      {!hasData && (
+        <span className="backup-state warn">
+          Had this set up before?{' '}
+          <button type="button" className="primary" onClick={() => fileInput.current?.click()}>Restore from backup file…</button>
+        </span>
+      )}
       {app.backup === 'error' && <span className="backup-state bad">Couldn't write the backup file. Try Download backup.</span>}
       {app.backup === 'ok' && <span className="backup-state ok">Backed up ✓ {app.backupAt ? time(app.backupAt) : ''}</span>}
       {app.saveFailed && <span className="backup-state bad">Couldn't save in this browser — download a backup now.</span>}

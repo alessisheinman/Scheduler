@@ -18,13 +18,11 @@ export function HoursPanel({ data, monday }: { data: AppData; monday: ISODate })
           return (
             <li key={p.id}>
               <span>{p.name}</span>
-              {p.dayRate ? (
-                <b>{t.days} {t.days === 1 ? 'day' : 'days'}</b>
-              ) : (
-                <b className={t.overtime > 0 ? 'ot' : ''}>
-                  {formatHours(t.hours)}{t.overtime > 0 && ` · ${formatHours(t.overtime)} OT`}
-                </b>
-              )}
+              <b className={t.overtime > 0 ? 'ot' : ''}>
+                {(t.hours > 0 || t.days === 0) && <>{formatHours(t.hours)}{t.overtime > 0 && ` · ${formatHours(t.overtime)} OT`}</>}
+                {t.hours > 0 && t.days > 0 && ' + '}
+                {t.days > 0 && `${t.days} ${t.days === 1 ? 'day' : 'days'}`}
+              </b>
             </li>
           );
         })}

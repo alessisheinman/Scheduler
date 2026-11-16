@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { addPerson, setBox } from './ops';
-import { periodTotals, weekTotals } from './payroll';
+import { defaultPaydayWeek, periodTotals, weekTotals } from './payroll';
 import { emptyData, type AppData } from './types';
 
 const W1 = '2026-11-02';
@@ -45,4 +45,19 @@ test('people with nothing in the period are left out, order follows the people l
   d = setBox(d, W2, id(d, 'BEN'), 0, shift(420, 600));
   d = setBox(d, W2, id(d, 'ANA'), 1, shift(420, 600));
   expect(periodTotals(d, [W2]).map((t) => t.personId)).toEqual([id(d, 'ANA'), id(d, 'BEN')]);
+});
+
+test('payday defaults to the newest week that has started, not next week’s plan', () => {
+  const mondays = ['2026-11-02', '2026-11-09', '2026-11-16'];
+  expect(defaultPaydayWeek(mondays, '2026-11-14')).toBe('2026-11-09');
+  expect(defaultPaydayWeek(mondays, '2026-11-16')).toBe('2026-11-16');
+  expect(defaultPaydayWeek(['2026-12-07'], '2026-11-14')).toBe('2026-12-07');
+  expect(defaultPaydayWeek([], '2026-11-14')).toBeUndefined();
+});
+
+test('days count only day boxes, so changing someone’s pay type never hides past hours', () => {
+  let d = people();
+  d = setBox(d, W2, id(d, 'ANA'), 0, shift(420, 1260));
+  d = setBox(d, W2, id(d, 'ANA'), 1, { kind: 'day', start: 300 });
+  expect(periodTotals(d, [W2])[0]).toMatchObject({ hours: 14, days: 1 });
 });

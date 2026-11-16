@@ -30,6 +30,21 @@ export function parseBackup(text: string): AppData {
   return d as AppData;
 }
 
+const hasData = (d: AppData) => d.weeks.length > 0 || d.people.length > 0;
+
+/**
+ * When she picks a backup file: if this site is empty (e.g. the browser was wiped) and the file already holds
+ * a backup, load it instead of writing the empty site over it.
+ */
+export function decideConnect(current: AppData, existingText: string | null): 'restore' | 'write' {
+  if (hasData(current) || !existingText) return 'write';
+  try {
+    return hasData(parseBackup(existingText)) ? 'restore' : 'write';
+  } catch {
+    return 'write';
+  }
+}
+
 /** Saves to the chosen backup file. Never prompts: a lapsed permission is reported so the page can show a button. */
 export async function writeBackup(h: FileLike | null, d: AppData, now: string): Promise<BackupStatus> {
   if (!h) return 'none';

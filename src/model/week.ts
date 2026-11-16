@@ -42,6 +42,12 @@ export function dayHeader(d: ISODate): { day: string; date: string } {
   return { day: DAYS[(t.getUTCDay() + 6) % 7], date: `${t.getUTCMonth() + 1}/${t.getUTCDate()}` };
 }
 
+/** Today's date on this computer. */
+export function todayISO(): ISODate {
+  const t = new Date();
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+}
+
 /** Excel's 1900 date system: serial 25569 is 1970-01-01. */
 export function excelSerialToISO(serial: number): ISODate {
   return fromUTC(new Date(Math.round((Math.floor(serial) - 25569) * DAY_MS)));
