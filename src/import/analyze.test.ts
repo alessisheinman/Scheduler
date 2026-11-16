@@ -44,8 +44,8 @@ test('look-alike venue names are suggested for merging', () => {
 });
 
 test('names: counts, merge suggestions, day-rate guess', () => {
-  expect(draft.names.map((n) => n.name).sort()).toEqual(['ANA', 'BEN', 'CARLA', 'DEV', 'MYLO', 'MILO']);
-  expect(draft.mergeSuggestions).toContainEqual(['MYLO', 'MILO']);
+  expect(draft.names.map((n) => n.name).sort()).toEqual(['ANA', 'BEN', 'CARLA', 'DEV', 'MILO', 'MYLO']);
+  expect(draft.mergeSuggestions).toContainEqual(['MILO', 'MYLO']);
   expect(draft.names.find((n) => n.name === 'DEV')!.dayRateLikely).toBe(true);
   expect(draft.names.find((n) => n.name === 'ANA')!.dayRateLikely).toBe(false);
 });
