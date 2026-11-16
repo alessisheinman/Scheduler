@@ -316,3 +316,19 @@ td.open .cell { outline: 3px solid var(--ink); }
 .two-col li { break-inside: avoid; }
 .wizard .swatch { display: inline-block; flex: none; }
 .add-to-week { margin-top: 0.6rem; }
+
+/* ---------- picking boxes ---------- */
+.week-grid { user-select: none; }
+.week-grid td.picked .cell { outline: 3px solid var(--brand); outline-offset: -1px; background: var(--brand-soft); }
+.week-grid td.picked .box { box-shadow: inset 0 0 0 3px var(--brand); }
+.grid-hint { margin: 0 0 0.5rem; font-size: 0.85rem; }
+.people-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; margin-bottom: 0.75rem; }
+.chip { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.85rem; background: var(--surface-2); }
+.chip:hover:not(:disabled) { background: var(--brand-soft); border-color: var(--brand); }
+.row-remove { margin-left: 0.2rem; padding: 0 0.3rem; }
+.seg { display: inline-flex; }
+.seg button { border-radius: 0; }
+.seg button:first-child { border-radius: 7px 0 0 7px; }
+.seg button:last-child { border-radius: 0 7px 7px 0; margin-left: -1px; }
+.seg button.on, .chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.week-picks { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.25rem 0 0.5rem; }

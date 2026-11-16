@@ -1,7 +1,7 @@
 import { getWeek } from './ops';
 import { shiftHours } from './time';
 import type { AppData, ID } from './types';
-import type { ISODate } from './week';
+import { addDays, mondayOf, type ISODate } from './week';
 
 export const OVERTIME_AFTER = 40;
 
@@ -59,4 +59,41 @@ export function periodTotals(data: AppData, mondays: ISODate[]): PersonTotal[] {
     }
   }
   return data.people.filter((p) => sums.has(p.id)).map((p) => sums.get(p.id)!);
+}
+
+/**
+ * Totals for any run of dates. Overtime looks at each whole Monday–Sunday week in day order: hours past 40
+ * are overtime, and only the part that falls inside the dates is counted here.
+ */
+export function rangeTotals(data: AppData, start: ISODate, end: ISODate): PersonTotal[] {
+  const sums = new Map<ID, PersonTotal>();
+  for (let monday = mondayOf(start); monday <= end; monday = addDays(monday, 7)) {
+    const w = getWeek(data, monday);
+    if (!w) continue;
+    for (const [personId, row] of Object.entries(w.boxes)) {
+      let before = 0;
+      const s = sums.get(personId) ?? { personId, hours: 0, regular: 0, overtime: 0, days: 0 };
+      let touched = false;
+      row.forEach((b, day) => {
+        if (!b) return;
+        const h = b.kind === 'shift' ? shiftHours(b.start, b.end) : 0;
+        const ot = Math.min(h, Math.max(0, before + h - OVERTIME_AFTER));
+        before += h;
+        const date = addDays(monday, day);
+        if (date < start || date > end) return;
+        touched = true;
+        s.hours += h;
+        s.overtime += ot;
+        s.regular += h - ot;
+        if (b.kind === 'day') s.days++;
+      });
+      if (touched) sums.set(personId, s);
+    }
+  }
+  return data.people
+    .filter((p) => sums.has(p.id))
+    .map((p) => {
+      const t = sums.get(p.id)!;
+      return { ...t, hours: round2(t.hours), regular: round2(t.regular), overtime: round2(t.overtime) };
+    });
 }

@@ -27,6 +27,7 @@ export function BoxEditor({ person, dayLabel, box, venues, defaultVenueId, onDon
 
   return (
     <div className="box-editor" role="dialog" aria-label={`${person.name}, ${dayLabel}`}
+      onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => {
         if (e.key === 'Escape') { e.stopPropagation(); onCancel(); }

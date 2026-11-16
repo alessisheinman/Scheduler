@@ -134,3 +134,8 @@ Light app chrome, same dog-photo side rails as her other two sites (reuse Menu G
 - Colored-but-empty boxes for the one frequent person: skip them (owner: "don't worry about" them).
 - Browser: Chrome. Backups via an automatic backup file.
 - She switches to the site right away; the workbook import is one-time.
+
+## Changes after launch (2026-11-16)
+
+- **Week screen:** "Add a crew" was replaced. Clicking a name chip puts that person on the week (only people on the week get a row). Click a box, drag across days and/or people, or Ctrl-click scattered boxes; one editor fills every picked box with a venue and times (day-rate people get "Day" with the start time). Clicking one filled box edits just that box.
+- **Payday:** two modes. **Weeks** — click any number of weeks (default: newest started week). **Days** — start and end date; overtime looks at each whole Monday–Sunday week in day order, and only the overtime that falls inside the dates is counted (a note shows when the dates cut a week).

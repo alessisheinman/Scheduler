@@ -2,9 +2,9 @@
 
 A small website for building a catering crew's weekly schedule.
 
-- **Week:** add whole crews at once (venue, days, hours, people), then click any box to change it. A side panel shows each person's hours for the week, with overtime over 40.
+- **Week:** click names to put people on the week, then click a box (or drag across days and people) and fill them all with one venue and set of times. A side panel shows each person's hours for the week, with overtime over 40.
 - **Save image:** a clean picture of the week to text to workers. It shows only shifts: no totals, no overtime.
-- **Payday:** hours per person for one or two weeks, split into regular and overtime (worked out week by week), plus days worked for people paid by the day. It can be printed or downloaded as a spreadsheet.
+- **Payday:** pick weeks (any number) or a start and end date. Hours per person are split into regular and overtime (over 40 in each Monday–Sunday week), plus days worked for people paid by the day. It can be printed or downloaded as a spreadsheet.
 - **Import:** a one-time import of the old Excel schedule, with a review step for anything it can't read.
 
 ## Where the data lives

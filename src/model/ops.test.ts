@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
-  addCrew, addPerson, addVenue, countReplacements, deleteVenue, getWeek, movePerson, peopleForWeek, peopleWorkingWeek, setBox,
+  addPerson, addVenue, cellsInRect, clearBoxes, countFilled, deleteVenue, fillBoxes, getWeek, movePerson, peopleForWeek, peopleWorkingWeek, setBox,
   startNextWeek, updatePerson, updateVenue,
 } from './ops';
 import { VENUE_PALETTE, suggestVenueColor } from './palette';
@@ -18,29 +18,49 @@ function fixture(): AppData {
 const id = (d: AppData, name: string) => d.people.find((p) => p.name === name)!.id;
 const venue = (d: AppData, name: string) => d.venues.find((v) => v.name === name)!.id;
 
-describe('addCrew', () => {
-  test('fills every person × day with the same shift and leaves the input untouched', () => {
+describe('fillBoxes', () => {
+  test('fills every picked box with the same shift and leaves the input untouched', () => {
     const d = fixture();
     const before = structuredClone(d);
     const vid = venue(d, 'BARCLAYS');
-    const out = addCrew(d, { monday: MON, venueId: vid, days: [0, 4], start: 420, end: 1260, personIds: d.people.map((p) => p.id) });
+    const cells = [id(d, 'ANA'), id(d, 'BEN'), id(d, 'CARLA')].flatMap((personId) => [0, 4].map((day) => ({ personId, day })));
+    const out = fillBoxes(d, MON, cells, { venueId: vid, start: 420, end: 1260 });
     expect(d).toEqual(before);
     const w = getWeek(out, MON)!;
-    const filled = Object.values(w.boxes).flat().filter(Boolean);
-    expect(filled).toHaveLength(6);
+    expect(Object.values(w.boxes).flat().filter(Boolean)).toHaveLength(6);
     expect(w.boxes[id(d, 'ANA')][4]).toEqual({ kind: 'shift', venueId: vid, start: 420, end: 1260 });
   });
 
-  test('empty days or people change nothing', () => {
-    const d = fixture();
-    expect(addCrew(d, { monday: MON, venueId: venue(d, 'BARCLAYS'), days: [], start: 420, end: 1260, personIds: [id(d, 'ANA')] })).toBe(d);
+  test('people paid by the day get a day box with the start time', () => {
+    let d = fixture();
+    d = addPerson(d, 'DEV', true);
+    const out = fillBoxes(d, MON, [{ personId: id(d, 'DEV'), day: 2 }, { personId: id(d, 'ANA'), day: 2 }], { venueId: null, start: 300, end: 1260 });
+    expect(getWeek(out, MON)!.boxes[id(d, 'DEV')][2]).toEqual({ kind: 'day', start: 300 });
+    expect(getWeek(out, MON)!.boxes[id(d, 'ANA')][2]).toMatchObject({ kind: 'shift', start: 300, end: 1260 });
   });
 
-  test('countReplacements counts boxes that already have something', () => {
+  test('clearing empties every picked box', () => {
+    let d = fixture();
+    d = fillBoxes(d, MON, [{ personId: id(d, 'ANA'), day: 0 }, { personId: id(d, 'ANA'), day: 1 }], { venueId: null, start: 420, end: 600 });
+    d = clearBoxes(d, MON, [{ personId: id(d, 'ANA'), day: 0 }, { personId: id(d, 'ANA'), day: 1 }]);
+    expect(peopleWorkingWeek(d, MON)).toEqual([]);
+  });
+
+  test('countFilled counts picked boxes that already have something', () => {
     let d = fixture();
     d = setBox(d, MON, id(d, 'ANA'), 0, { kind: 'shift', venueId: null, start: 300, end: 600 });
-    const crew = { monday: MON, venueId: venue(d, 'BARCLAYS'), days: [0, 1], start: 420, end: 1260, personIds: [id(d, 'ANA'), id(d, 'BEN')] };
-    expect(countReplacements(d, crew)).toBe(1);
+    expect(countFilled(d, MON, [{ personId: id(d, 'ANA'), day: 0 }, { personId: id(d, 'BEN'), day: 0 }])).toBe(1);
+  });
+});
+
+describe('cellsInRect (drag to pick)', () => {
+  test('dragging picks every box between the two corners, any direction', () => {
+    const rows = ['a', 'b', 'c'];
+    expect(cellsInRect(rows, { row: 2, day: 3 }, { row: 1, day: 1 })).toEqual([
+      { personId: 'b', day: 1 }, { personId: 'b', day: 2 }, { personId: 'b', day: 3 },
+      { personId: 'c', day: 1 }, { personId: 'c', day: 2 }, { personId: 'c', day: 3 },
+    ]);
+    expect(cellsInRect(rows, { row: 0, day: 5 }, { row: 0, day: 5 })).toEqual([{ personId: 'a', day: 5 }]);
   });
 });
 

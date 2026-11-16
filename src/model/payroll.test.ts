@@ -1,6 +1,6 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { addPerson, setBox } from './ops';
-import { defaultPaydayWeek, periodTotals, weekTotals } from './payroll';
+import { defaultPaydayWeek, periodTotals, rangeTotals, weekTotals } from './payroll';
 import { emptyData, type AppData } from './types';
 
 const W1 = '2026-11-02';
@@ -60,4 +60,38 @@ test('days count only day boxes, so changing someone’s pay type never hides pa
   d = setBox(d, W2, id(d, 'ANA'), 0, shift(420, 1260));
   d = setBox(d, W2, id(d, 'ANA'), 1, { kind: 'day', start: 300 });
   expect(periodTotals(d, [W2])[0]).toMatchObject({ hours: 14, days: 1 });
+});
+
+describe('rangeTotals (pay by dates)', () => {
+  const tenHourDays = (d: AppData, monday: string, days: number[]) => {
+    for (const day of days) d = setBox(d, monday, id(d, 'ANA'), day, shift(480, 1080)); // 8AM-6PM = 10h
+    return d;
+  };
+
+  test('a full Monday–Sunday range matches the week totals', () => {
+    const d = tenHourDays(people(), W2, [0, 1, 2, 3, 4]);
+    expect(rangeTotals(d, '2026-11-09', '2026-11-15')[0]).toMatchObject({ hours: 50, regular: 40, overtime: 10 });
+  });
+
+  test('a range starting mid-week still pays overtime where it happened (whole week counts toward 40)', () => {
+    const d = tenHourDays(people(), W2, [0, 1, 2, 3, 4]); // Mon..Fri = 10, 20, 30, 40, 50
+    expect(rangeTotals(d, '2026-11-11', '2026-11-15')[0]).toMatchObject({ hours: 30, regular: 20, overtime: 10 });
+    expect(rangeTotals(d, '2026-11-09', '2026-11-11')[0]).toMatchObject({ hours: 30, regular: 30, overtime: 0 });
+  });
+
+  test('a shift that crosses 40 is split into regular and overtime', () => {
+    let d = tenHourDays(people(), W2, [0, 1, 2]); // 30h
+    d = setBox(d, W2, id(d, 'ANA'), 3, shift(420, 1260)); // +14h → 44
+    expect(rangeTotals(d, '2026-11-12', '2026-11-12')[0]).toMatchObject({ hours: 14, regular: 10, overtime: 4 });
+  });
+
+  test('a range across two weeks adds each week, and days count only inside the range', () => {
+    let d = tenHourDays(people(), W1, [5, 6]);
+    d = tenHourDays(d, W2, [0]);
+    d = setBox(d, W1, id(d, 'DEV'), 6, { kind: 'day', start: 300 });
+    d = setBox(d, W2, id(d, 'DEV'), 1, { kind: 'day', start: 300 });
+    const t = rangeTotals(d, '2026-11-08', '2026-11-09');
+    expect(t.find((x) => x.personId === id(d, 'ANA'))).toMatchObject({ hours: 20, overtime: 0 });
+    expect(t.find((x) => x.personId === id(d, 'DEV'))).toMatchObject({ days: 1 });
+  });
 });

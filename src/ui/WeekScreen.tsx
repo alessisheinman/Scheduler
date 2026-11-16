@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { peopleForWeek, startNextWeek } from '../model/ops';
+import { startNextWeek } from '../model/ops';
 import { addDays, mondayOf, todayISO, weekLabel, type ISODate } from '../model/week';
-import { AddCrewPanel } from './AddCrewPanel';
 import { HoursPanel } from './HoursPanel';
 import type { AppState } from './useAppData';
 import { WeekGrid } from './WeekGrid';
@@ -21,7 +20,6 @@ export function WeekScreen({ app, monday, setMonday, onPayday, onSaveImage, onIm
 }) {
   const { data, update } = app;
   const [asking, setAsking] = useState(false);
-  const people = peopleForWeek(data, monday);
   const nextExists = data.weeks.some((w) => w.monday === addDays(monday, 7));
 
   function next(copy: boolean) {
@@ -62,8 +60,6 @@ export function WeekScreen({ app, monday, setMonday, onPayday, onSaveImage, onIm
           <button type="button" className="primary" onClick={onSaveImage}>Save image</button>
         </div>
       </div>
-
-      <AddCrewPanel data={data} monday={monday} people={people} update={update} />
 
       <div className="week-body">
         <div className="card grid-card">

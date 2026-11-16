@@ -6,7 +6,8 @@ import { addDays, type ISODate } from './week';
 
 export const newId = (): string => crypto.randomUUID();
 
-export interface Crew { monday: ISODate; venueId: ID; days: number[]; start: Minutes; end: Minutes; personIds: ID[] }
+/** One box in a week: a person and a day (0 = Monday). */
+export interface Cell { personId: ID; day: number }
 
 export function getWeek(data: AppData, monday: ISODate): Week | undefined {
   return data.weeks.find((w) => w.monday === monday);
@@ -38,21 +39,39 @@ export function setBox(data: AppData, monday: ISODate, personId: ID, day: number
   return editWeek(data, monday, (boxes) => { slots(boxes, personId)[day] = box; });
 }
 
-export function addCrew(data: AppData, c: Crew): AppData {
-  if (c.days.length === 0 || c.personIds.length === 0) return data;
-  return editWeek(data, c.monday, (boxes) => {
-    for (const pid of c.personIds) {
-      for (const day of c.days) slots(boxes, pid)[day] = { kind: 'shift', venueId: c.venueId, start: c.start, end: c.end };
+/**
+ * Fills every picked box with one shift. People paid by the day get a day box with the start time instead.
+ */
+export function fillBoxes(data: AppData, monday: ISODate, cells: Cell[], fill: { venueId: ID | null; start: Minutes; end: Minutes }): AppData {
+  if (cells.length === 0) return data;
+  const dayRate = new Set(data.people.filter((p) => p.dayRate).map((p) => p.id));
+  return editWeek(data, monday, (boxes) => {
+    for (const c of cells) {
+      slots(boxes, c.personId)[c.day] = dayRate.has(c.personId)
+        ? { kind: 'day', start: fill.start }
+        : { kind: 'shift', venueId: fill.venueId, start: fill.start, end: fill.end };
     }
   });
 }
 
-export function countReplacements(data: AppData, c: Crew): number {
-  const w = getWeek(data, c.monday);
-  if (!w) return 0;
-  let n = 0;
-  for (const pid of c.personIds) for (const day of c.days) if (w.boxes[pid]?.[day]) n++;
-  return n;
+export function clearBoxes(data: AppData, monday: ISODate, cells: Cell[]): AppData {
+  if (cells.length === 0) return data;
+  return editWeek(data, monday, (boxes) => { for (const c of cells) if (boxes[c.personId]) boxes[c.personId][c.day] = null; });
+}
+
+/** How many of the picked boxes already have something in them. */
+export function countFilled(data: AppData, monday: ISODate, cells: Cell[]): number {
+  const w = getWeek(data, monday);
+  return cells.filter((c) => w?.boxes[c.personId]?.[c.day]).length;
+}
+
+/** Every box between two dragged-to corners (rows are the grid's person order). */
+export function cellsInRect(rows: ID[], a: { row: number; day: number }, b: { row: number; day: number }): Cell[] {
+  const out: Cell[] = [];
+  for (let r = Math.min(a.row, b.row); r <= Math.max(a.row, b.row); r++) {
+    for (let day = Math.min(a.day, b.day); day <= Math.max(a.day, b.day); day++) out.push({ personId: rows[r], day });
+  }
+  return out;
 }
 
 export function startNextWeek(data: AppData, fromMonday: ISODate, copyBoxes: boolean): { data: AppData; monday: ISODate } {
