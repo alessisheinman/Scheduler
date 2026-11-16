@@ -252,7 +252,7 @@ button.primary:hover:not(:disabled) { background: var(--brand-dark); border-colo
 .time-input.bad { border-color: var(--red); box-shadow: 0 0 0 3px rgb(192 0 0 / 0.15); }
 
 .week-body { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 1rem; align-items: start; }
-.grid-card { padding: 0.75rem; overflow-x: auto; }
+.grid-card { padding: 0.75rem; }
 .week-grid { border-collapse: separate; border-spacing: 3px; width: 100%; table-layout: fixed; }
 .week-grid thead th { font-size: 0.8rem; color: var(--muted); font-weight: 700; padding: 0.2rem; }
 .week-grid thead th span { display: block; font-weight: 500; }
@@ -288,3 +288,13 @@ td.open .cell { outline: 3px solid var(--ink); }
   .week-body { grid-template-columns: 1fr; }
   .hours-panel { position: static; }
 }
+
+/* ---------- payday ---------- */
+.payday-controls { align-items: flex-end; margin-bottom: 1rem; }
+.payday-table { width: 100%; border-collapse: collapse; }
+.payday-table th, .payday-table td { text-align: right; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--line); }
+.payday-table th:first-child, .payday-table td:first-child { text-align: left; }
+.payday-table th { font-size: 0.82rem; color: var(--muted); }
+.payday-table td.ot { color: var(--red); font-weight: 700; }
+.payday-table tbody tr:hover { background: var(--surface-2); }
+.payday-actions { margin-left: auto; }
