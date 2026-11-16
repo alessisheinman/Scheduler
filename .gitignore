@@ -1,0 +1,10 @@
+# Client material — never commit (public repo)
+*.xlsx
+*.xls
+*.csv
+*.zip
+.superpowers/
+
+# Build
+node_modules/
+dist/
