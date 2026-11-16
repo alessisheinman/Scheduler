@@ -1,5 +1,5 @@
 // What goes on the picture workers receive. Built only from shifts — totals and overtime never enter it.
-import { getWeek, peopleForWeek } from './ops';
+import { getWeek, peopleWorkingWeek } from './ops';
 import { formatShift, formatTime } from './time';
 import type { AppData } from './types';
 import { dayHeader, weekDates, weekLabel, type ISODate } from './week';
@@ -17,8 +17,7 @@ export interface ImageModel {
 
 export function buildImageModel(data: AppData, monday: ISODate): ImageModel {
   const week = getWeek(data, monday);
-  const rows = peopleForWeek(data, monday)
-    .filter((p) => week?.boxes[p.id]?.some(Boolean))
+  const rows = peopleWorkingWeek(data, monday)
     .map((p) => ({
       name: p.name,
       cells: (week!.boxes[p.id]).map((b): ImageCell => {

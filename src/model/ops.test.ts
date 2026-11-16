@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
-  addCrew, addPerson, addVenue, countReplacements, deleteVenue, getWeek, movePerson, peopleForWeek, setBox,
+  addCrew, addPerson, addVenue, countReplacements, deleteVenue, getWeek, movePerson, peopleForWeek, peopleWorkingWeek, setBox,
   startNextWeek, updatePerson, updateVenue,
 } from './ops';
 import { VENUE_PALETTE, suggestVenueColor } from './palette';
@@ -103,5 +103,15 @@ describe('people', () => {
   test('movePerson reorders', () => {
     const d = fixture();
     expect(movePerson(d, id(d, 'CARLA'), 0).people.map((p) => p.name)).toEqual(['CARLA', 'ANA', 'BEN']);
+  });
+});
+
+describe('peopleWorkingWeek', () => {
+  test('only people with at least one box that week, in list order', () => {
+    let d = fixture();
+    d = setBox(d, MON, id(d, 'CARLA'), 3, { kind: 'shift', venueId: null, start: 420, end: 1260 });
+    d = setBox(d, MON, id(d, 'ANA'), 0, { kind: 'day', start: 300 });
+    expect(peopleWorkingWeek(d, MON).map((p) => p.name)).toEqual(['ANA', 'CARLA']);
+    expect(peopleWorkingWeek(d, '2026-11-16')).toEqual([]);
   });
 });

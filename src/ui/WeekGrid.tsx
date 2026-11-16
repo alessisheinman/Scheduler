@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getWeek, peopleForWeek, setBox } from '../model/ops';
+import { getWeek, peopleForWeek, peopleWorkingWeek, setBox } from '../model/ops';
 import { formatShift, formatTime } from '../model/time';
 import type { AppData, Box } from '../model/types';
 import { dayHeader, weekDates, type ISODate } from '../model/week';
@@ -26,11 +26,36 @@ export function WeekGrid({ data, monday, update }: {
 }) {
   const [open, setOpen] = useState<{ personId: string; day: number } | null>(null);
   const [lastVenue, setLastVenue] = useState<string | null>(null);
-  const people = peopleForWeek(data, monday);
+  // People added to this week by hand before they have a box (so she can click one).
+  const [added, setAdded] = useState<Record<string, string[]>>({});
+  const extra = added[monday] ?? [];
+  const working = new Set(peopleWorkingWeek(data, monday).map((p) => p.id));
+  const people = data.people.filter((p) => working.has(p.id) || extra.includes(p.id));
+  const addable = peopleForWeek(data, monday).filter((p) => !people.includes(p));
   const week = getWeek(data, monday);
   const days = weekDates(monday).map(dayHeader);
 
-  if (people.length === 0) return <p className="empty">No people yet. Add them on the People tab, or import the old spreadsheet.</p>;
+  if (data.people.length === 0) return <p className="empty">No people yet. Add them on the People tab, or import the old spreadsheet.</p>;
+
+  const addPicker = addable.length > 0 && (
+    <div className="row add-to-week">
+      <select value="" aria-label="Add someone to this week"
+        onChange={(e) => e.target.value && setAdded({ ...added, [monday]: [...extra, e.target.value] })}>
+        <option value="">+ Add someone to this week…</option>
+        {addable.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+      </select>
+      <span className="muted">Only people with hours show here and on the picture.</span>
+    </div>
+  );
+
+  if (people.length === 0) {
+    return (
+      <>
+        <p className="empty">No one is scheduled this week yet. Use "Add a crew" above, or add someone below.</p>
+        {addPicker}
+      </>
+    );
+  }
 
   return (
     <div className="grid-wrap">
@@ -76,6 +101,7 @@ export function WeekGrid({ data, monday, update }: {
           ))}
         </tbody>
       </table>
+      {addPicker}
     </div>
   );
 }

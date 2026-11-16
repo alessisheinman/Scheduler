@@ -315,3 +315,4 @@ td.open .cell { outline: 3px solid var(--ink); }
 .two-col { columns: 2 22rem; column-gap: 2rem; }
 .two-col li { break-inside: avoid; }
 .wizard .swatch { display: inline-block; flex: none; }
+.add-to-week { margin-top: 0.6rem; }

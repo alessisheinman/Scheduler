@@ -103,6 +103,12 @@ export function deleteVenue(data: AppData, id: ID): AppData {
   return { ...data, venues: data.venues.filter((v) => v.id !== id) };
 }
 
+/** Only the people with at least one box this week, in list order — the rows of the grid and the picture. */
+export function peopleWorkingWeek(data: AppData, monday: ISODate): Person[] {
+  const w = getWeek(data, monday);
+  return data.people.filter((p) => w?.boxes[p.id]?.some(Boolean) ?? false);
+}
+
 /** Everyone not hidden, plus hidden people who have something in this week — in list order. */
 export function peopleForWeek(data: AppData, monday: ISODate): Person[] {
   const w = getWeek(data, monday);
