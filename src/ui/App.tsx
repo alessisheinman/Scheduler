@@ -6,6 +6,8 @@ import { useAppData } from './useAppData';
 import { VenuesScreen } from './VenuesScreen';
 import { defaultMonday, WeekScreen } from './WeekScreen';
 import type { ISODate } from '../model/week';
+import { buildImageModel } from '../model/image';
+import { downloadScheduleImage } from './renderImage';
 
 export type View = 'week' | 'payday' | 'people' | 'venues' | 'import';
 const VIEWS: View[] = ['week', 'payday', 'people', 'venues', 'import'];
@@ -54,7 +56,7 @@ export function App() {
           {view === 'venues' && <VenuesScreen app={app} />}
           {view === 'week' && (
             <WeekScreen app={app} monday={monday} setMonday={setMonday}
-              onPayday={() => go('payday')} onImport={() => go('import')} onSaveImage={() => {}} />
+              onPayday={() => go('payday')} onImport={() => go('import')} onSaveImage={() => void downloadScheduleImage(buildImageModel(app.data, monday), `schedule-${monday}.png`)} />
           )}
           {(view === 'payday' || view === 'import') && (
             <div className="card"><p className="empty">Coming next.</p></div>
